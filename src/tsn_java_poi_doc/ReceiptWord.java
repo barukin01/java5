@@ -55,6 +55,53 @@ public class ReceiptWord extends javax.swing.JFrame {
         initComponents();
     }
 
+    
+     class TThread3 extends Thread {
+
+        public void run() {
+            String dir = new File(".").getAbsoluteFile().getParentFile().getAbsolutePath()
+                    + System.getProperty("file.separator");
+
+            // Чтение из файла-шаблона в переменную doc
+            HWPFDocument doc = null;
+            try ( FileInputStream fis = new FileInputStream(dir + "receipt_template.doc")) {
+                doc = new HWPFDocument(fis);
+                fis.close();
+            } catch (Exception ex) {
+                System.err.println("Error template!");
+            }
+
+            // Замена в переменной doc данных
+            try {
+                doc.getRange().replaceText("$ФИОплательщика", jTextField_FIO.getText());
+                doc.getRange().replaceText("$АДРЕСплательщика", jTextField_Adres.getText());
+            } catch (Exception ex) {
+                System.err.println("Error replaceText!");
+            }
+
+            // Сохранение переменной doc в новый файл
+            try ( FileOutputStream fos = new FileOutputStream(dir + "receipt.docx")) {
+                doc.write(fos);
+                fos.close();
+
+                // Открытие файла внешней программой
+                if (System.getProperty("os.name").equals("Linux")
+                        && System.getProperty("java.vendor").startsWith("Red Hat")) {
+                    new ProcessBuilder("xdg-open", dir + "receipt.docx").start();
+                } else {
+                    Desktop.getDesktop().open(new File(dir + "receipt.docx"));
+                }
+            } catch (Exception ex) {
+                System.err.println("Error getDesktop!");
+            }
+            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        }
+    }
+    
+    
+    
+    
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -62,6 +109,7 @@ public class ReceiptWord extends javax.swing.JFrame {
         jButton_Save = new javax.swing.JButton();
         jTextField_FIO = new javax.swing.JTextField();
         jTextField_Adres = new javax.swing.JTextField();
+        jButton_Save_DOCX = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -77,7 +125,7 @@ public class ReceiptWord extends javax.swing.JFrame {
             }
         });
         getContentPane().add(jButton_Save);
-        jButton_Save.setBounds(1090, 490, 190, 21);
+        jButton_Save.setBounds(1200, 490, 90, 21);
 
         jTextField_FIO.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         getContentPane().add(jTextField_FIO);
@@ -86,6 +134,16 @@ public class ReceiptWord extends javax.swing.JFrame {
         jTextField_Adres.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         getContentPane().add(jTextField_Adres);
         jTextField_Adres.setBounds(670, 360, 700, 30);
+
+        jButton_Save_DOCX.setText("в DOCX");
+        jButton_Save_DOCX.setToolTipText("");
+        jButton_Save_DOCX.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton_Save_DOCXActionPerformed(evt);
+            }
+        });
+        getContentPane().add(jButton_Save_DOCX);
+        jButton_Save_DOCX.setBounds(1100, 490, 80, 21);
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/tsn_java_poi_doc/receipt.png"))); // NOI18N
         jLabel1.setMaximumSize(new java.awt.Dimension(1414, 564));
@@ -102,6 +160,11 @@ public class ReceiptWord extends javax.swing.JFrame {
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         new TThread1().start();
     }//GEN-LAST:event_jButton_SaveActionPerformed
+
+    private void jButton_Save_DOCXActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_Save_DOCXActionPerformed
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        new TThread3().start();
+    }//GEN-LAST:event_jButton_Save_DOCXActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -137,6 +200,7 @@ public class ReceiptWord extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton_Save;
+    private javax.swing.JButton jButton_Save_DOCX;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JTextField jTextField_Adres;
     private javax.swing.JTextField jTextField_FIO;
